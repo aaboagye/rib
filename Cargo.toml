@@ -1,0 +1,4 @@
+[package]
+name = "rust_irc_bot"
+version = "0.1.0"
+authors = ["Aseda Aboagye <aseda.aboagye@gmail.com>"]
