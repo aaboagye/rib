@@ -8,10 +8,8 @@ pub struct IrcCon<'a> {
 }
 
 pub enum IrcMessage {
-	Pass,
 	Nick,
 	User,
-	Quit,
 }
 
 impl <'a> IrcCon<'a> {
@@ -28,7 +26,6 @@ impl <'a> IrcCon<'a> {
 				s.push_str("NICK ");
 				s.push_str(self.nick);
 			},
-			_ => panic!("That message type is not yet implemented."),
 		};
 		s.push_str("\r\n");
 		println!("<{}", s.as_str());
