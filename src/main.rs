@@ -32,7 +32,7 @@ fn main() {
 mod tests {
     use super::*;
     use std::fs::File;
-    use std::io::Write;
+    use std::io::{BufRead,Write};
     use irc::*;
     use bufstream::BufStream;
     use std::str;
@@ -62,17 +62,19 @@ mod tests {
             let bs = BufStream::new(f);
             let mut test_bot = irc::IrcCon { stream: bs, nick: "test_bot" };
             let mut buffer = String::new();
-            // Verify the strings are equal
+            // Grab all available data from the stream and obtain a line iterator.
+            let mut read_str = test_bot.read_socket(&mut buffer).unwrap().lines();
+
+            // Verify the lines are what we expect.
             for i in 0..list.len() {
-                let read_str = test_bot.read_socket(&mut buffer).unwrap().as_bytes();
-                if list[i].len() != read_str.len() {
-                    println!("Expected: `{}`\nGot: `{}`",str::from_utf8(list[i]).unwrap(), str::from_utf8(read_str).unwrap());
+                let line = read_str.next().unwrap(); // Does not return the newline
+                let expected = str::from_utf8(list[i]).unwrap().split("\n").nth(0).unwrap();
+                if expected != line {
+                    println!("{}-Expected: `{}`\nGot: `{}`", i, expected, line);
                     panic!();
                 }
-                if list[i] != read_str {
-                    panic!("Expected: `{}`\nGot: `{}`",str::from_utf8(list[i]).unwrap(), str::from_utf8(read_str).unwrap());
-                }
             }
+            // TODO: Need to let the BufStream know we consumed all those bytes.
         }
     }
 }

@@ -3,6 +3,7 @@ extern crate bufstream;
 use std::net;
 use std::io;
 use std::io::{Read,Write,BufRead};
+use std::str;
 use bufstream::BufStream;
 
 const IRC_MESSAGE_MAX_LEN: usize = 510;
@@ -40,10 +41,11 @@ impl <'a, T: Read + Write> IrcCon<'a, T> {
 	}
 
 	pub fn read_socket<'b>(&'b mut self, s: &'b mut String) -> Result<&str, io::Error> {
-		// Try and read data from the stream.
-		let num_bytes = self.stream.read_line(s).unwrap();
-		self.stream.consume(num_bytes);
-		Ok(s.as_str())
+		// Try and read all available data from the stream.
+		match BufStream::fill_buf(&mut self.stream) {
+			Ok(buffer) => Ok(str::from_utf8(buffer).unwrap()),
+			Err(e) => Err(e),
+		}
 	}
 }
 
