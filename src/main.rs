@@ -4,18 +4,10 @@
 // Obtain input from somewhere (maybe a text file)
 // Parse the input and perform an action based upon the input
 #![feature(ip_addr,lookup_host,convert,duration,thread_sleep)]
-use std::fs::File;
-use std::io;
-use std::io::{Read,BufRead};
-use std::vec;
-use std::net;
-use std::error::Error;
-
-extern crate bufstream;
-use bufstream::BufStream;
-
 use std::thread;
 use std::time::Duration;
+
+extern crate bufstream;
 
 pub mod irc;
 
@@ -26,25 +18,14 @@ fn main() {
     };
     println!("Connected.\n===BEGIN STREAM===");
     let mut bot = irc::IrcCon { stream : conn, nick : "aaboagye_bot" };
-    bot.send_message(irc::IrcMessage::User, "foo").ok();
-    bot.send_message(irc::IrcMessage::Nick, "aaboagye_bot").ok();
+    bot.send_cmd(irc::IrcMessage::User).ok();
+    bot.send_cmd(irc::IrcMessage::Nick).ok();
     let mut buffer = String::new();
-    while true {
+    loop {
         println!("{}", bot.read_socket(&mut buffer).unwrap());
         thread::sleep(Duration::new(5, 0));
     }
 
-}
-
-// Return the strings as the commands
-fn get_input(f: File) -> Vec<String> {
-    let infile = io::BufReader::new(&f);
-    let mut input: Vec<String> = Vec::<String>::new();
-    for l in infile.lines() {
-        // Append line to vector
-        input.push(l.ok().unwrap());
-    }
-    input
 }
 
 #[cfg(test)]

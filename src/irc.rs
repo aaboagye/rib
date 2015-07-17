@@ -18,7 +18,7 @@ pub enum IrcMessage {
 }
 
 impl <'a, T: Read + Write> IrcCon<'a, T> {
-	pub fn send_message(&mut self, t: IrcMessage, msg: &str) -> Result<(), io::Error> {
+	pub fn send_cmd(&mut self, t: IrcMessage) -> Result<(), io::Error> {
 		/* Format a message and send it to the server. */
 		let mut s = String::with_capacity(IRC_MESSAGE_MAX_LEN);
 		match t {
@@ -40,7 +40,7 @@ impl <'a, T: Read + Write> IrcCon<'a, T> {
 	}
 
 	pub fn read_socket<'b>(&'b mut self, s: &'b mut String) -> Result<&str, io::Error> {
-		// Try and read data from the connection.
+		// Try and read data from the stream.
 		let num_bytes = self.stream.read_line(s).unwrap();
 		self.stream.consume(num_bytes);
 		Ok(s.as_str())
