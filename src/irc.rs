@@ -7,8 +7,8 @@ use bufstream::BufStream;
 
 const IRC_MESSAGE_MAX_LEN: usize = 510;
 
-pub struct IrcCon<'a> {
-    pub stream: bufstream::BufStream<net::TcpStream>,
+pub struct IrcCon<'a, T: Read + Write> {
+    pub stream: bufstream::BufStream<T>,
     pub nick: &'a str,
 }
 
@@ -17,7 +17,7 @@ pub enum IrcMessage {
 	User,
 }
 
-impl <'a> IrcCon<'a> {
+impl <'a, T: Read + Write> IrcCon<'a, T> {
 	pub fn send_message(&mut self, t: IrcMessage, msg: &str) -> Result<(), io::Error> {
 		/* Format a message and send it to the server. */
 		let mut s = String::with_capacity(IRC_MESSAGE_MAX_LEN);
