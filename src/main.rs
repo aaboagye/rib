@@ -47,10 +47,11 @@ mod tests {
         const TEST_FILE: &'static str = "test_line_by_line.txt";
         // Create a sample text file and populate it with test strings
         let test_strings = vec![b"line 1\r\n", b"line 2\r\n", b"line 3\r\n"];
+        let list = test_strings.as_slice();
         {
             let mut f = File::create(TEST_FILE).unwrap();
-            for s in test_strings {
-                f.write(s).unwrap();
+            for i in 0..list.len() {
+                f.write(list[i]).unwrap();
             }
         }
         
@@ -62,13 +63,14 @@ mod tests {
             let mut test_bot = irc::IrcCon { stream: bs, nick: "test_bot" };
             let mut buffer = String::new();
             // Verify the strings are equal
-            let test_strings = vec![b"line 1\r\n", b"line 2\r\n", b"line 3\r\n"];
-            for s in test_strings {
+            for i in 0..list.len() {
                 let read_str = test_bot.read_socket(&mut buffer).unwrap().as_bytes();
-                if s.len() != read_str.len() {
-                    println!("Strings are NOT the same length.");
-                    println!("Expected: `{}`\nGot: `{}`",str::from_utf8(s).unwrap(), str::from_utf8(read_str).unwrap());
-                    assert!(false);
+                if list[i].len() != read_str.len() {
+                    println!("Expected: `{}`\nGot: `{}`",str::from_utf8(list[i]).unwrap(), str::from_utf8(read_str).unwrap());
+                    panic!();
+                }
+                if list[i] != read_str {
+                    panic!("Expected: `{}`\nGot: `{}`",str::from_utf8(list[i]).unwrap(), str::from_utf8(read_str).unwrap());
                 }
             }
         }
