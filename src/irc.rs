@@ -36,14 +36,14 @@ impl <'a, T: Read + Write> IrcCon<'a, T> {
 		s.push_str("\r\n");
 		println!("<{}", s.as_str());
 
-		/* Send it out the TcpStream. */
+		/* Send it out the stream. */
 		self.stream.write_all(s.as_bytes())
 	}
 
-	pub fn read_socket<'b>(&'b mut self, s: &'b mut String) -> Result<&str, io::Error> {
+	pub fn read_socket<'b>(&'b mut self) -> Result<Vec<&str>, io::Error> {
 		// Try and read all available data from the stream.
 		match BufStream::fill_buf(&mut self.stream) {
-			Ok(buffer) => Ok(str::from_utf8(buffer).unwrap()),
+			Ok(b) => Ok(str::from_utf8(b).unwrap().split("\r\n").collect()),
 			Err(e) => Err(e),
 		}
 	}
