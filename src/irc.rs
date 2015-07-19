@@ -15,6 +15,7 @@ pub struct IrcCon<'a, T: Read + Write> {
 
 pub enum IrcMessage {
 	Nick,
+	Pass,
 	User,
 }
 
@@ -23,21 +24,27 @@ impl <'a, T: Read + Write> IrcCon<'a, T> {
 		/* Format a message and send it to the server. */
 		let mut s = String::with_capacity(IRC_MESSAGE_MAX_LEN);
 		match t {
-			IrcMessage::User => {
-				s.push_str("USER ");
-				s.push_str(self.nick);
-				s.push_str(" 0 * :*");
-			},
 			IrcMessage::Nick => {
 				s.push_str("NICK ");
 				s.push_str(self.nick);
+			},
+			IrcMessage::Pass => {
+				s.push_str("PASS ");
+			},
+			IrcMessage::User => {
+				s.push_str("USER ");
+				s.push_str(self.nick);
+				s.push_str(" ");
+				s.push_str(self.nick);
+				s.push_str(" * :*");
 			},
 		};
 		s.push_str("\r\n");
 		println!("<{}", s.as_str());
 
 		/* Send it out the stream. */
-		self.stream.write_all(s.as_bytes())
+		self.stream.write(s.as_bytes()).unwrap();
+		self.stream.flush()
 	}
 
 	pub fn read_socket<'b>(&'b mut self) -> Result<Vec<&str>, io::Error> {
@@ -46,6 +53,11 @@ impl <'a, T: Read + Write> IrcCon<'a, T> {
 			Ok(b) => Ok(str::from_utf8(b).unwrap().split("\r\n").collect()),
 			Err(e) => Err(e),
 		}
+	}
+
+	pub fn update(&mut self, bytes_consumed: usize) {
+		self.stream.consume(bytes_consumed);
+		println!("consumed: {}B", &bytes_consumed);
 	}
 }
 
@@ -58,7 +70,7 @@ pub fn connect_to_server() -> Result<net::TcpStream, io::Error> {
         .expect("Error reading line.");
 
     hostname.trim();
-    let mut results = match net::lookup_host(&hostname) {
+    let mut results = match net::lookup_host(&hostname.as_str()) {
         Ok(r) => r,
         Err(_) => panic!("net::lookup_host failed."),
     };
@@ -85,7 +97,7 @@ pub fn connect_to_server() -> Result<net::TcpStream, io::Error> {
             }
         }
     };
-    let port: u16 = 6660;
+    let port: u16 = 6667;
     let conn = try!(net::TcpStream::connect((server_ip, port)));
     Ok(conn)
 }
