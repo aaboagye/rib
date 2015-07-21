@@ -17,6 +17,7 @@ pub enum IrcMessage {
 	Nick,
 	Pass,
 	Ping,
+	Pong,
 	User,
 }
 
@@ -34,6 +35,10 @@ impl <'a, T: Read + Write> IrcCon<'a, T> {
 			},
 			IrcMessage::Ping => {
 				s.push_str("PING ");
+				s.push_str(m.unwrap());
+			},
+			IrcMessage::Pong => {
+				s.push_str("PONG ");
 				s.push_str(m.unwrap());
 			},
 			IrcMessage::User => {
