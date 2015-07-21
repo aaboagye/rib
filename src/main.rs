@@ -19,16 +19,16 @@ fn main() {
     };
     println!("Connected.\n===BEGIN STREAM===");
     let mut bot = irc::IrcCon { stream : conn, nick : "aaboagye_bot" };
-    bot.send_cmd(irc::IrcMessage::Nick).unwrap();
-    bot.send_cmd(irc::IrcMessage::User).unwrap();
+    bot.send_cmd(irc::IrcMessage::Nick, None).unwrap();
+    bot.send_cmd(irc::IrcMessage::User, None).unwrap();
     loop {
         let mut b: usize = 0;
         {
             let buf = bot.read_socket().unwrap();
             for i in 0..buf.len()-1 {
-                 b += buf[i].len();
+                b += buf[i].len();
+                b += 2; // for carriage return newline
             };
-            b += 2; // for carriage return newline
             for i in 0..buf.len()-1 {
                 println!(">{:?}", buf[i]);
             }

@@ -16,11 +16,12 @@ pub struct IrcCon<'a, T: Read + Write> {
 pub enum IrcMessage {
 	Nick,
 	Pass,
+	Ping,
 	User,
 }
 
 impl <'a, T: Read + Write> IrcCon<'a, T> {
-	pub fn send_cmd(&mut self, t: IrcMessage) -> Result<(), io::Error> {
+	pub fn send_cmd(&mut self, t: IrcMessage, m: Option<&str>) -> Result<(), io::Error> {
 		/* Format a message and send it to the server. */
 		let mut s = String::with_capacity(IRC_MESSAGE_MAX_LEN);
 		match t {
@@ -30,6 +31,10 @@ impl <'a, T: Read + Write> IrcCon<'a, T> {
 			},
 			IrcMessage::Pass => {
 				s.push_str("PASS ");
+			},
+			IrcMessage::Ping => {
+				s.push_str("PING ");
+				s.push_str(m.unwrap());
 			},
 			IrcMessage::User => {
 				s.push_str("USER ");
