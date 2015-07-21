@@ -25,11 +25,11 @@ fn main() {
         let mut b: usize = 0;
         {
             let buf = bot.read_socket().unwrap();
-            for i in 0..buf.len() {
+            for i in 0..buf.len()-1 {
                  b += buf[i].len();
             };
             b += 2; // for carriage return newline
-            for i in 0..buf.len() {
+            for i in 0..buf.len()-1 {
                 println!(">{:?}", buf[i]);
             }
         }
@@ -128,17 +128,18 @@ mod tests {
     
 
         // Call consume
-        for i in 0..read_buf.len() {
+        for i in 0..read_buf.len()-1 {
             println!("read_buf[{}] - '{}' len: {}", i, read_buf[i], read_buf[i].len());
             b += read_buf[i].len();
             b += 2; // for carriage return newline
         };
 
     }
-        test_bot.update(17);
+        test_bot.update(b);
         // Write the last element
         let mut g = File::create(TEST_FILE).unwrap();
         g.write(list[list.len()-1]).unwrap();
+        g.flush();
         let last_expected = str::from_utf8(list[list.len()-1]).unwrap();
         let last_buf = test_bot.read_socket().unwrap();
         if last_buf[0] != last_expected {
